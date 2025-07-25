@@ -12,23 +12,23 @@ library("V.PhyloMaker2")
 ###Script macro-evolution Summer of Science###
 
 ###Construct a histogram to view the frequency distribution of seed mass###
-hist(log10(Seed_mass_data$mass))
+hist(log10(Data_seed_mass$mass))
 
 ###Construct a boxplot of seed mass data###
-boxplot(log10(Seed_mass_data$mass), main="Seed mass boxplot", xlab="All data", ylab="Seed mass")
+boxplot(log10(Data_seed_mass$mass), main="Seed mass boxplot", xlab="All data", ylab="Seed mass")
 
-###Construct a boxplot of seed mass data per life form###
-boxplot(log10(Seed_mass_data$mass)~Seed_mass_data$lifeform, data=Seed_mass_data, main="Seed mass boxplot", xlab="Life form", ylab="Seed mass")
+###Construct a boxplot of seed mass data per longevity category###
+boxplot(log10(Data_seed_mass$mass)~Data_seed_mass$longevity, data=Data_seed_mass, main="Seed mass boxplot", xlab="Longevity", ylab="Seed mass")
 
 ###Construct a scatterplot of seed mass and plant height###
-plot(log10(Seed_mass_data$mass), log10(Seed_mass_data$height), main="scatterplot of seed mass versus plant height", xlab="seed mass", ylab="plant height")
+plot(log10(Data_seed_mass$mass), log10(Data_seed_mass$height), main="scatterplot of seed mass versus plant height", xlab="seed mass", ylab="plant height")
 
 ###add a regression line to the scatterplot###
-abline(lm(log10(Seed_mass_data$height) ~ log10(Seed_mass_data$mass)), col = "blue")
+abline(lm(log10(Data_seed_mass$height) ~ log10(Data_seed_mass$mass)), col = "blue")
 
 ###Constructing a phylogenetic tree from a mega-tree using the Phylomaker package###
 ###Make a matrix containg species, genera and family###
-species.list=Seed_mass_data[,1:3]
+species.list=Data_seed_mass[,1:3]
 
 ###Run V.phylomaker###
 output.phylo.maker = phylo.maker(species.list, tree = GBOTB.extended.TPL, scenarios = c("S3"))
@@ -52,16 +52,16 @@ plot(unroot(phylogeny),type="unrooted",cex=0.6, use.edge.length=FALSE, no.margin
 
 ###Methods for visualising trait distributions on a phylogenetic tree###
 ###Create a matrix with only seed mass values###
-seedmass = Seed_mass_data$mass
+seedmass = Data_seed_mass$mass
 names(seedmass)=phylogeny$tip.label
 
 ###Visualise seed mass data by using different circle sizes at the species tips###
 dotTree(phylogeny,log10(seedmass),length=10, fsize=0.4)
 
 ###Create a matrix with seed mass and plant height values###
-traits = Seed_mass_data[,6:7]
+traits = Data_seed_mass[,4:5]
 traits = as.data.frame(traits)
-rownames(traits)=Seed_mass_data$Species
+rownames(traits)=Data_seed_mass$Species
 
 ###Visualise seed mass data by using different circle sizes at the species tips###
 dotTree(phylogeny,log10(traits),standardize=TRUE,length=10, fsize=0.3)
@@ -71,7 +71,6 @@ plotTree.wBars(phylogeny,log10(seedmass),type="fan",scale=10, fsize=0.7,tip.labe
 
 ###Make a phenogram, this is a projection of the tree into a space defined by time on the horizontal axis, and phenotype on the vertical dimension###
 phenogram(phylogeny,log10(seedmass),fsize=0.5,spread.costs=c(1,0))
-
 
 ###Calculate ancestral states and confidence intervals for seed mass###
 fit<-fastAnc(phylogeny,log10(seedmass),CI=TRUE)
@@ -92,7 +91,7 @@ add.color.bar(1.0,obj$cols,title="trait value",lims=obj$lims,prompt=FALSE, x=0.9
 phylosig(phylogeny, log10(seedmass), method="lambda", test=TRUE, nsim=1000)
 
 ###Calculate phylogenetic signal of plant height###
-height = Seed_mass_data$height
+height = Data_seed_mass$height
 names(height)=phylogeny$tip.label
 phylosig(phylogeny, log10(height), method="lambda", test=TRUE, nsim=1000)
 
@@ -103,5 +102,9 @@ fitContinuous(phylogeny, log10(seedmass), model = c("white"))
 ###A brownian motion model with lambda equal 1 assumes that only genetic drift has played a role in seed size evolution###
 fitContinuous(phylogeny, log10(seedmass), model = c("BM"))
 
+###A brownian motion model with lambda estimated using a likelihood approach###
+fitContinuous(phylogeny, log10(seedmass), model = c("lambda"))
+
 ###An Ornstein Uhlenbeck model assumes besides genetic drift also stabilizing selection has played a role in seed size evolution###
 fitContinuous(phylogeny, log10(seedmass), model = c("OU"))
+
